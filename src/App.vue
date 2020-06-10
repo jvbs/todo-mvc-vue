@@ -1,6 +1,7 @@
 <template>
   <div id="app" class="container">
-    <img src="./assets/logo.png" class="logo">
+    <!-- <img src="./assets/logo.png" class="logo"> -->
+    <h1 class="text-center">Todo List App</h1>
     <todo-list/>
   </div>
 </template>
@@ -28,6 +29,10 @@ export default {
   margin: 0 auto;
 }
 
+.text-center {
+  text-align: center;
+}
+
 .logo {
   display: block;
   margin: 20px auto;
@@ -41,5 +46,6 @@ export default {
   /* text-align: center; */
   color: #2c3e50;
   margin-top: 60px;
+  font-size: 24px;
 }
 </style>
