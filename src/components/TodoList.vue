@@ -10,31 +10,14 @@
       name="fade"
       enter-active-class="animated fadeInUp"
       leave-active-class="animated fadeOutDown">
-      <div
+      <todo-item
         v-for="(todo, index) in todosFiltered" :key="todo.id"
-        class="todo-item">
-        <div class="todo-item-left">
-          <input v-model="todo.completed" type="checkbox">
-          <div
-            v-if="!todo.editMode"
-            class="todo-item-label"
-            :class="{ completed : todo.completed }"
-            @dblclick="editTodo(todo)">{{ todo.title }}</div>
-          <input
-            v-else
-            v-model="todo.title"
-            v-focus
-            @blur="doneEdit(todo)"
-            @keyup.enter="doneEdit(todo)"
-            @keyup.esc="cancelEdit(todo)"
-            class="todo-item-edit"
-            type="text"
-            >
-        </div>
-        <div class="remove-item" @click="removeTodo(index)">
-          &times;
-        </div>
-      </div>
+        class="todo-item"
+        :todo="todo"
+        :index="index"
+        :checkAll="!anyRemaining"
+        @removedTodo="removeTodo"
+        @finishedEditTodo="finishedEdit"></todo-item>
     </transition-group>
     <div class="extra-container">
       <div>
@@ -73,8 +56,13 @@
 </template>
 
 <script>
+import TodoItem from './TodoItem'
+
 export default {
   name: 'todo-list',
+  components : {
+    TodoItem
+  },
   data () {
     return {
       newTodo: '',
@@ -103,16 +91,6 @@ export default {
       ]
     }
   },
-
-  directives: {
-    focus: {
-      // directive definition
-      inserted: function(el){
-        el.focus()
-      }
-    }
-  },
-
   computed: {
     remaining(){
       return this.todos.filter(todo => !todo.completed).length
@@ -180,6 +158,12 @@ export default {
 
     clearCompleted(){
       this.todos = this.todos.filter(todo => !todo.completed)
+    },
+
+    finishedEdit(data){
+      // const index = this.todos.findIndex((item) => item.id == data.id)
+      console.log(data)
+      this.todos.splice(data.index, 1, data.todo)
     }
   }
 }
