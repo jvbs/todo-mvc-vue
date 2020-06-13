@@ -15,40 +15,19 @@
         class="todo-item"
         :todo="todo"
         :index="index"
-        :checkAll="!anyRemaining"
-        @removedTodo="removeTodo"
-        @finishedEditTodo="finishedEdit"></todo-item>
+        :checkAll="!anyRemaining"></todo-item>
     </transition-group>
     <div class="extra-container">
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            @change="checkAllTodos"
-            :checked="!anyRemaining"> Marcar todos
-        </label>
-      </div>
-      <div>
-        {{ remaining }} itens
-      </div>
+      <todo-check-all :anyRemaining="anyRemaining"></todo-check-all>
+      <todo-items-remaining :remaining="remaining"/>
     </div>
-
     <div class="extra-container">
-      <div>
-        <button
-          :class="{ active: filter == 'all'}"
-          @click="filter = 'all'">Todos</button>
-        <button
-          :class="{ active: filter == 'active'}"
-          @click="filter = 'active'">Ativas</button>
-        <button
-          :class="{ active: filter == 'completed'}"
-          @click="filter = 'completed'">Completas</button>
-      </div>
+      <todo-filtered></todo-filtered>
 
       <div>
-        <transition name="fase">
-          <button v-if="showClearCompletedButton" @click="clearCompleted">Excluir finalizadas</button>
+        <transition name="fade">
+          <todo-clear-completed
+            :showClearCompletedButton="showClearCompletedButton"/>
         </transition>
       </div>
     </div>
@@ -57,12 +36,21 @@
 
 <script>
 import TodoItem from './TodoItem'
+import TodoItemsRemaining from './TodoItemsRemaining'
+import TodoCheckAll from './TodoCheckAll'
+import TodoFiltered from './TodoFiltered'
+import TodoClearCompleted from './TodoClearCompleted'
 
 export default {
   name: 'todo-list',
   components : {
-    TodoItem
+    TodoItem,
+    TodoItemsRemaining,
+    TodoCheckAll,
+    TodoFiltered,
+    TodoClearCompleted,
   },
+
   data () {
     return {
       newTodo: '',
@@ -91,6 +79,23 @@ export default {
       ]
     }
   },
+
+  created(){
+    eventBus.$on('removedTodo', (index) => this.removeTodo(index))
+    eventBus.$on('finishedEditTodo', (data) => this.finishedEdit(data))
+    eventBus.$on('checkAllChanged', (checked) => this.checkAllTodos(checked))
+    eventBus.$on('filterChanged', (filter) => this.filter = filter)
+    eventBus.$on('clearCompletedTodos', () => this.clearCompleted())
+  },
+
+  beforeDestroy(){
+    eventBus.$off('removedTodo', (index) => this.removeTodo(index))
+    eventBus.$off('finishedEditTodo', (data) => this.finishedEdit(data))
+    eventBus.$off('checkAllChanged', (checked) => this.checkAllTodos(checked))
+    eventBus.$off('filterChanged', (filter) => this.filter = filter)
+    eventBus.$off('clearCompletedTodos', () => this.clearCompleted())
+  },
+
   computed: {
     remaining(){
       return this.todos.filter(todo => !todo.completed).length
@@ -162,7 +167,7 @@ export default {
 
     finishedEdit(data){
       // const index = this.todos.findIndex((item) => item.id == data.id)
-      console.log(data)
+      // console.log(data)
       this.todos.splice(data.index, 1, data.todo)
     }
   }

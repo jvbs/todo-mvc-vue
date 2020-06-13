@@ -18,8 +18,11 @@
         type="text"
         >
     </div>
-    <div class="remove-item" @click="removeTodo(index)">
-      &times;
+    <div>
+      <button @click="pluralize">Plural</button>
+      <span class="remove-item" @click="removeTodo(index)">
+        &times;
+      </span>
     </div>
   </div>
 </template>
@@ -41,6 +44,7 @@ export default {
       required: true
     }
   },
+
   data(){
     return {
       'id': this.todo.id,
@@ -50,6 +54,7 @@ export default {
       'beforeEditCache': '',
     }
   },
+
   directives: {
     focus: {
       // directive definition
@@ -58,14 +63,24 @@ export default {
       }
     }
   },
+
+  created(){
+    eventBus.$on('pluralize', this.handlePluralize)
+  },
+
+  beforeDestroy(){
+    eventBus.$off('pluralize', this.handlePluralize)
+  },
+
   watch: {
     checkAll(){
       this.completed = this.checkAll ? true : this.todo.completed
     }
   },
+
   methods: {
     removeTodo(index){
-      this.$emit('removedTodo', index)
+      eventBus.$emit('removedTodo', index)
     },
 
     editTodo(){
@@ -83,7 +98,7 @@ export default {
         this.title = this.beforeEditCache
       }
       this.editMode = false
-      this.$emit('finishedEditTodo', {
+      eventBus.$emit('finishedEditTodo', {
         'index': this.index,
         'todo': {
           'id': this.id,
@@ -94,6 +109,22 @@ export default {
       })
     },
 
+    pluralize(){
+      eventBus.$emit('pluralize')
+    },
+
+    handlePluralize(){
+      this.title = this.title + 's'
+      eventBus.$emit('finishedEditTodo', {
+        'index': this.index,
+        'todo': {
+          'id': this.id,
+          'title': this.title,
+          'completed': this.completed,
+          'editMode': this.editMode
+        }
+      })
+    }
   }
 }
 </script>
